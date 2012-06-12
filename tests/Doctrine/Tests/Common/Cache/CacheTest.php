@@ -18,15 +18,15 @@ abstract class CacheTest extends \Doctrine\Tests\DoctrineTestCase
 
         // Test fetch
         $this->assertEquals('testing this out', $cache->fetch('test_key'));
-        
+
         // Test delete
         $cache->save('test_key2', 'test2');
         $cache->delete('test_key2');
         $this->assertFalse($cache->contains('test_key2'));
-        
+
         // Fetch/save test with objects (Is cache driver serializes/unserializes objects correctly ?)
-        $cache->save('test_object_key', new \ArrayObject());
-        $this->assertTrue($cache->fetch('test_object_key') instanceof \ArrayObject);        
+        $cache->save('test_object_key', new VarExportableArrayObject());
+        $this->assertTrue($cache->fetch('test_object_key') instanceof VarExportableArrayObject);
     }
 
     public function testDeleteAll()
@@ -69,7 +69,10 @@ abstract class CacheTest extends \Doctrine\Tests\DoctrineTestCase
      */
     public function testGetStats()
     {
-        if ($this instanceof ArrayCacheTest || $this instanceof ZendDataCacheTest ) {
+        if ($this instanceof ArrayCacheTest
+            || $this instanceof ZendDataCacheTest
+            || $this instanceof PhpFileCacheTest
+        ) {
             $this->markTestSkipped("Statistics are not available for this driver");
         }
 
@@ -88,4 +91,11 @@ abstract class CacheTest extends \Doctrine\Tests\DoctrineTestCase
      * @return \Doctrine\Common\Cache\CacheProvider
      */
     abstract protected function _getCacheDriver();
+}
+
+class VarExportableArrayObject
+{
+    public static function __set_state() {
+        return new static;
+    }
 }

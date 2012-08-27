@@ -106,6 +106,24 @@ class ClosureExpressionVisitorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($closure(new TestObject(4)));
     }
 
+    public function testWalkContainsComparison()
+    {
+        $closure = $this->visitor->walkComparison($this->builder->contains("quxs", 1));
+
+        $this->assertTrue($closure(new TestObject(null, null, array(1))));
+        $this->assertFalse($closure(new TestObject(null, null, array())));
+        $this->assertFalse($closure(new TestObject(null, null, array(2, 3))));
+    }
+
+    public function testWalkNotContainsComparison()
+    {
+        $closure = $this->visitor->walkComparison($this->builder->notContains("quxs", 1));
+
+        $this->assertFalse($closure(new TestObject(null, null, array(1))));
+        $this->assertTrue($closure(new TestObject(null, null, array())));
+        $this->assertTrue($closure(new TestObject(null, null, array(2, 3))));
+    }
+
     public function testWalkAndCompositeExpression()
     {
         $closure = $this->visitor->walkCompositeExpression(
@@ -178,11 +196,13 @@ class TestObject
 {
     private $foo;
     private $bar;
+    private $quxs;
 
-    public function __construct($foo = null, $bar = null)
+    public function __construct($foo = null, $bar = null, $quxs = null)
     {
         $this->foo = $foo;
         $this->bar = $bar;
+        $this->quxs = $quxs;
     }
 
     public function getFoo()
@@ -193,6 +213,11 @@ class TestObject
     public function getBar()
     {
         return $this->bar;
+    }
+
+    public function getQuxs()
+    {
+        return $this->quxs;
     }
 }
 
